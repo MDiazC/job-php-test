@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Base de datos: `test_destinia`
+-- Base de datos: `troovel_social`
 --
 
 -- --------------------------------------------------------
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `test_apartment_info` (
   `num_guests` int(11) NOT NULL,
   `type_room` int(11) NOT NULL,
   UNIQUE KEY `id` (`entity_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1;
 
 --
 -- Volcado de datos para la tabla `test_apartment_info`

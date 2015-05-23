@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 16-03-2015 a las 14:11:28
+-- Tiempo de generación: 16-03-2015 a las 14:11:15
 -- Versión del servidor: 10.0.16-MariaDB-log
 -- Versión de PHP: 5.6.5
 
@@ -23,36 +23,27 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `test_apartment_availability`
+-- Estructura de tabla para la tabla `test_cities`
 --
 
-CREATE TABLE IF NOT EXISTS `test_apartment_availability` (
+CREATE TABLE IF NOT EXISTS `test_cities` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `entity_id` int(11) NOT NULL,
-  `availables` int(11) NOT NULL DEFAULT '0',
+  `name_en` varchar(512) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+  `name_es` varchar(512) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=16 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;
 
 --
--- Volcado de datos para la tabla `test_apartment_availability`
+-- Volcado de datos para la tabla `test_cities`
 --
 
-INSERT INTO `test_apartment_availability` (`id`, `entity_id`, `availables`) VALUES
-(1, 11, 0),
-(2, 12, 3),
-(3, 13, 4),
-(4, 14, 1),
-(5, 15, 1),
-(6, 16, 4),
-(7, 17, 8),
-(8, 18, 1),
-(9, 19, 3),
-(10, 20, 15),
-(11, 21, 0),
-(12, 29, 8),
-(13, 30, 9),
-(14, 31, 0),
-(15, 32, 10);
+INSERT INTO `test_cities` (`id`, `name_en`, `name_es`) VALUES
+(1, 'Madrid', 'Madrid'),
+(2, 'New York', 'Nueva York'),
+(3, 'Cologne', 'Colonia'),
+(4, 'London', 'Londres'),
+(5, 'Barcelone', 'Barcelona'),
+(6, 'Friburg', 'Friburgo');
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
