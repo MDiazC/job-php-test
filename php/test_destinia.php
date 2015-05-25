@@ -5,17 +5,9 @@
 // Enables garbage collector
 gc_enable();
 
-// Prevent Destinia Libraries Unnecessary requires
-define('PREVENT_REQUIRES', true);
-
-// Load Destinia Framework
-require_once '/usr/local/global/php/libraries/framework/FW.php';
-
-// Load autoloader class and register autoloader function
-require_once ('/web/guide/troovel/php/SplClassLoader.php');
-$autoloader = new \SplClassLoader(null, '/web/guide/troovel/php');
-$autoloader->register();
-
+require_once("Hotel.php");
+require_once("Apartment.php");
+require_once("DBConnection.php");
 
 main($argv, $argc);
 
@@ -34,10 +26,10 @@ function main($argv, $argc){
 		}
 	}
 
-	$hotelName=extractHotelName($entry);
+	$accomodationName=extractAccomodationName($entry);
 
-	if(!empty($hotelName)){
-		$results=searchInDatabase($hotelName);
+	if(!empty($accomodationName)){
+		$results=searchInDatabase($accomodationName);
 
 		if(empty($results))
 			printf("We have not founds results for %s \n",implode(' ',$entry));
@@ -48,27 +40,35 @@ function main($argv, $argc){
 		printf("We have not founds results for %s \n",implode(' ',$entry));
 }
 
-//if the user types "Hotel Gran via" or "Cervantes Apartments" this funcions removes words 'Hotel' or 'Apartments' because are not useful for the search
-function extractHotelName($entry){
-	$hotelName="";
-	//it suppose that the forbidden words should be extracted from the database where there are the words 'Hotel' or 'Apartments' and variations
-	//in other languages. For this test I think the array is enough
+/**
+ * if the user types "Hotel Gran via" or "Cervantes Apartments" this funcions removes words 'Hotel' or 'Apartments' because are not useful for the search
+ * @param string $entry
+ * @return string $hotelName
+ */
+function extractAccomodationName($entry){
+	$accomodationName="";
+	/**
+	 * it suppose that the forbidden words should be extracted from the database where there aren't the words 'Hotel' or 'Apartments' and variations
+	 * in other languages. For this test I think the array is enough
+	 */
 	$forbiddenWords  = array("hotel", "apartamentos", "apartments", "appartements", "apartamento", "apartment", "appartement");
 	foreach($entry as $word){
 		if(!in_array(strtolower($word), $forbiddenWords)){
-			$hotelName=$word;
+			$accomodationName=$word;
 			break;
 		}
 	}
-	return $hotelName;
+	return $accomodationName;
 }
 
-//I use teh Destinia FW for connecting to the database, I suppose we can do it
-//Thanks to the function extractHotelName we are sure that the $hotelName is a real name and not words 'hotel' o similar that are not useful for the search
-//in this function we launch the sql to the database and collect the different info of the element returned
-function searchInDatabase($hotelName){
+/*I use a class for connecting to the database, I am sure that the $hotelName is a real name and not words 'hotel' o similar that are not useful for the search
+ * in this function we launch the sql to the database and collect the different info of the element returned
+ * @param string accomodationName
+ * @return array $results
+ */
+function searchInDatabase($accomodationName){
 
-	$key =  substr($hotelName, 0, 3);
+	$key =  substr($accomodationName, 0, 3);
 	$lang = getUserLanguage();
 	$results=array();
 
@@ -83,27 +83,37 @@ function searchInDatabase($hotelName){
 				LEFT JOIN test_type_room AS room_hotel ON hotel.type_room = room_hotel.id
 				LEFT JOIN test_type_room AS room_apartment ON apartment.type_room = room_apartment.id
 				LEFT JOIN test_apartment_availability AS availability ON availability.entity_id = search.id
-				WHERE search.name LIKE '%%s%'
+				WHERE search.name LIKE '%$key'
 				ORDER BY search.name ASC";
 
-	$cursor = \Destinia\Helper::getCursor();
-	$cursor->exec($sql, array($key), 'utf8');
-	while($row = $cursor->fetch(MYSQL_NUM)){
-		if(empty($row[1])){
-			$results[]= new Apartment($row[0], $row[2], $row[3], $row[6], $row[4], $row[5]);
+    $fields=array("name", "stars", "guests", "type_room", "city_name","country_name", "availability");
+
+	$DBConnection = new DBCOnnection();
+    $results= $DBConnection->launchSelectQuery($query, $fields);
+    $i=0;
+	while($i < count($results)){
+		if(empty($results[$i][1])){
+			$results[]= new Apartment($results[$i][0], $results[$i][2], $results[$i][3], $results[$i][6], $results[$i][4], $results[$i][5]);
 		}else{
-			$results[]= new Hotel($row[0], $row[1], $row[3], $row[4], $row[5]);
+			$results[]= new Hotel($results[$i][0], $results[$i][1], $results[$i][3], $results[$i][4], $results[$i][5]);
 		}
+        $i++;
 	}
 	return $results;
 }
 
-//It is supposse that in this function we connect with the database or with the browser and get the language of the user, for this text I put english as a default
+/**
+ * It is supposse that in this function we connect with the database or with the browser and get the language of the user, for this text I put english as a default
+ * @return string $language
+ */ 
 function getUserLanguage(){
 	return 'en';
 }
 
-//with the results of the function searchInDatabase, we go through the array and print the info, depending the type of object we print a text or other different
+/**
+ * With the results of the function searchInDatabase, we go through the array and print the info, depending the type of object we print a text or other different
+ * @param array
+ */
 function printResults($results){
 
 	$texts= outputTexts();
@@ -116,7 +126,10 @@ function printResults($results){
 	}
 }
 
-//for the function printResults we need a few texts in teh language of the user, this function provides this texts
+/**
+ * for the function printResults we need a few texts in the language of the user, this function provides this texts
+ * @return array
+ */
 function outputTexts(){
 	if(getUserLanguage() == 'en'){
 		$texts = array('Stars', 'Apartments', 'Adults');

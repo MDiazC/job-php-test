@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Class for managing the connection with the database
+ */ 
 class DBConnection {
 
     private $dbhost;
@@ -23,7 +26,7 @@ class DBConnection {
         if (!$this->link) {
             die('Could not connect: ' . mysql_error());
         }
-        mysql_select_db($this->dbname) 
+        mysql_select_db($this->dbname); 
     }
 
     function closeConnection(){
@@ -31,35 +34,38 @@ class DBConnection {
     }
 
 
-    function launchSQL($query){
-        $query="SELECT * FROM contacts";
-        $result=mysql_query($query);
+    function launchSelectQuery($query, $fields){
 
-        $num=mysql_numrows($result);
+        $this->openConnection();
+        $query_result=mysql_query($query);
+        $data_result=array();
 
-        mysql_close();
+        $num_results=mysql_numrows($result);
+        $num_fields= count($fields);
 
-        echo "<b><center>Database Output</center></b><br><br>";
+        $this->closeConnection();
 
         $i=0;
-        while ($i < $num) {
-
-        $first=mysql_result($result,$i,"first");
-        $last=mysql_result($result,$i,"last");
-        $phone=mysql_result($result,$i,"phone");
-        $mobile=mysql_result($result,$i,"mobile");
-        $fax=mysql_result($result,$i,"fax");
-        $email=mysql_result($result,$i,"email");
-        $web=mysql_result($result,$i,"web");
-
-        echo "<b>$first $last</b><br>Phone: $phone<br>Mobile: $mobile<br>Fax: $fax<br>E-mail: $email<br>Web: $web<br><hr><br>";
-
+        while ($i < $num_results) {
+            $j=0;
+            while($j < $num_fields){
+                $data_result[$i][$j]=mysql_result($query_result,$i,$fields[$j]);
+                $j++;
+            }
         $i++;
         }
+        return $data_result;
     }
 
-    function insert(){
-        $query = "INSERT INTO contacts VALUES ('','$first','$last','$phone','$mobile','$fax','$email','$web')";
+    function launchInsertQuery($table, $fields){
+        $query = "INSERT INTO ".$table;
+        $query.="VALUES (";
+        for($i=0;$i<count($fields);$i++){
+            $query.=$fields.", ";
+        }
+        rtrim($query,",");
+        $query.=")";
+
         mysql_query($query);
     }
 
